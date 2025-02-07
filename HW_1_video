@@ -1,0 +1,12 @@
+###
+name = "Ebubechiokike Adiele, Haja Harivelo, Svetlana Sokolova"
+email = "ebube.adiele01@gmail.com, hajaharivelo@gmail.com, ssokolova01@qub.ac.uk "
+slack_username = "@Ebubechiokike, @Haja, and @Svetlana"
+hobby_E, hobby_H, hobby_S = ["music", "cooking", "playing piano"]
+country_E, country_H, country_S = ["Nigeria", "Madagascar", "Russia"]
+pref_prog_lang1, pref_prog_lang2 = ["Python", "R"]
+Tutorial_monologue = f"Hello, My name is Svetlana and I will be hosting this tutorial video.\n\nWe are team cysterine and we would like you to meet us.\n\nThe 
+members of our team are {name}. You can contact us via our respective email addresses at {email}.\n\nYou can also find us on slack {slack_username}.\n\nI am 
+from {country_S}, Haja is from {country_H}, and Ebubechiokike is from {country_E}.\n\nI love {hobby_S}, Haja loves {hobby_H} 
+and Ebubechiokike loves {hobby_E}.\n\nHaja and Ebubechiokike prefer to code in {pref_prog_lang1} while Svetlana prefers {pref_prog_lang2}.\n\nThank you 
+so much for watching this short tutorial."

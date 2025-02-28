@@ -1,0 +1,38 @@
+import pandas as pd
+import seaborn as sns
+import numpy as np
+import matplotlib.pyplot as plt
+
+#Import the gene expression dataset
+data = "https://gist.githubusercontent.com/stephenturner/806e31fce55a8b7175af/raw/1a507c4c3f9f1baaa3a69187223ff3d3050628d4/results.txt"
+#Read the dataset
+df = pd.read_csv(data, sep = r'\s+')
+
+#Create a neg_log10_pvalue for further volcano plot visualisation for scalability and better data representation
+df['neg_log10_pvalue'] = -np.log10(df['pvalue'])
+
+#Volcano plot visualisation
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x='log2FoldChange', y='neg_log10_pvalue', data=df,
+        hue=df['padj'] < 0.05, palette={True: 'red', False: 'black'}, s=80)plt.title('Volcano Plot')
+plt.xlabel('Log2 Fold Change')
+plt.ylabel('-Log10 P-value')
+plt.legend(title='Significance', labels=['Non-Significant', 'Significant'])
+plt.grid(True)
+plt.show()
+
+#Filtering gene expression data by log2FoldChange and pvalue parameters to find upregulated genes.
+upregulated_genes = df[(df['log2FoldChange'] > 1) & (df['pvalue'] < 0.01)]
+
+#Filtering gene expression data by log2FoldChange and pvalue parameters to find downregulated genes.
+downregulated_genes = df[(df['log2FoldChange'] < -1) & (df['pvalue'] < 0.01)]
+
+#Sorting top 5 upregulated genes according their log2FoldChange.
+top_up_genes = upregulated_genes.sort_values(by='log2FoldChange', ascending=False).head(5)
+up_gene_list = top_up_genes['Gene'].tolist()
+print("Top 5 Upregulated Genes:", up_gene_list)
+
+#Sorting top 5 downregulated genes according their log2FoldChange.
+top_down_genes = downregulated_genes.sort_values(by='log2FoldChange', ascending=True).head(5)
+down_gene_list = top_down_genes['Gene'].tolist()
+print("Top 5 Downregulated Genes:", down_gene_list)

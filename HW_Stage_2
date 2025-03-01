@@ -115,3 +115,77 @@ for strain in df['Strain'].unique():
     print(g)
 
 ### Task 2.4 ###
+#Import two datasets: SIFT and FoldX
+data_source_sift = "https://raw.githubusercontent.com/HackBio-Internship/public_datasets/main/R/datasets/sift.tsv"
+data_source_foldx = "https://raw.githubusercontent.com/HackBio-Internship/public_datasets/main/R/datasets/foldX.tsv"
+
+#Read datasets' files and specify delimiter to separate values
+df_sift = pd.read_csv(data_source_sift, sep = r'\s+')
+df_foldx = pd.read_csv(data_source_foldx, sep = r'\s+')
+
+#Create specific_Protein_aa column in both datasets
+df_sift['specific_Protein_aa'] = df_sift['Protein'] + '_' + df_sift['Amino_Acid']
+df_foldx['specific_Protein_aa'] = df_foldx['Protein'] + '_' + df_foldx['Amino_Acid']
+
+#Merge of the SIFT and FoldX datasets in one dataframe using specific_Protein_aa column
+final_df = pd.merge(df_sift, df_foldx, on='specific_Protein_aa', how='outer')
+
+#New merged dataframe filtering by sift_Score (<0.05) and foldx_Score (>2)
+filtered_df = final_df[(final_df['sift_Score'] < 0.05) & (final_df['foldX_Score'] > 2)]
+
+#Checking if there are any differences between filtered results for data from SIFT and FoldX datasets.
+#The result was True, so the filtering results for both data source coincide and we can continue to work with one of them.
+same_values = (filtered_df['Amino_Acid_x'] == filtered_df['Amino_Acid_y']).all()
+print(f"Are Amino_Acid_x and Amino_Acid_y identical? {same_values}")
+
+#Extracting from Amino_Acid the first amino acid to explore which of them has the most functional and structural impact.
+#Write it into new column Original_AA
+filtered_df['Original_AA_x'] = filtered_df['Amino_Acid_x'].str[0]
+
+#Count, index columns and form final frequency table of the amino acids.
+amino_acid_freq_x = filtered_df['Original_AA_x'].value_counts().reset_index()
+amino_acid_freq_x.columns = ['Amino_Acid', 'Frequency']
+
+#Visualisation
+
+#Bar plot
+import seaborn as sns
+sns.set_style("whitegrid")
+bar_plot = sns.catplot(
+  data=amino_acid_freq_x,
+  x="Amino_Acid",
+  y="Frequency",
+  kind="bar",
+  palette="magma",
+  height=6,
+  aspect=1.5
+)
+bar_plot.set_axis_labels("Amino Acid", "Total Frequency")
+bar_plot.fig.suptitle("Amino Acid Frequency Distribution (Bar Plot)")
+
+#Pie chart
+import matplotlib.pyplot as plt
+plt.figure(figsize=(8,8))
+plt.pie(amino_acid_freq_x['Frequency'], labels=amino_acid_freq_x['Amino_Acid'],
+    autopct='%1.1f%%', colors=sns.color_palette("magma", len(amino_acid_freq_x)),
+    startangle=90, wedgeprops={'edgecolor': 'black'})
+plt.title("Amino Acid Frequency Distribution (Pie Chart)", fontsize=14)
+plt.show()
+
+#Amino acid with the highest impact on protein structure and function: G (Glycine)
+#Glycine's impact on protein structure and function:
+#Slycine is the smallest AA which enables it to fold into a compact structure. That is used in collagen which can fold into a triple helix structure. Glycine provides flexibility for enzyme active sites.
+
+#Find amino acids with Frequency more than 100 occurrence.
+high_occurrence_aa = amino_acid_freq_x[amino_acid_freq_x['Frequency'] > 100]
+print(high_occurrence_aa)
+
+#Structural and functional properties of amino acids with more than 100 occurrences.
+#AA with occurrences > 100 (13): G (Glycine), L (Leucine), A (Alanine), P (Proline), V (Valine), R (Arginine), I (Isoleucine), Y (Tyrosine), D (Aspattic acid), F (Phenylalanine), S (Serine), T (Threonine), W (Tryptophane). 
+#Hydrophobic amino acids (L, A, P, V, I, F, W) stabilize the protein core. Polar and charged amino acids (R, Y, D, S, T) participate in catalysis, signaling, and interactions. Proline (P) and glycine (G) uniquely affect protein flexibility.
+#G is small and flexible, it disrupts secondary structures so that it increases conformational flexibility. L, I, V, A are hydrophobic and they are essential for structural integrity. Proline is rigid and it disrupts helices, so that it forces bends in protein. R, D are charged and involved in salted bridges; they are key for enzimatic reactions and protein interactions. Y, W, F have aromatic structure which results into stacking of interactions; they are important for signaling and enzyme active sites. Serine and Threonine are polar which allow them to form hydrogen bonds; they are crucial for phosphorylation and regulation processes.
+#Conclusion. Hydrophobic amino acids (L, A, P, V, I, F, W) stabilize the protein core. Polar and charged amino acids (R, Y, D, S, T) participate in catalysis, signaling, and interactions. Proline and glycine uniquely affect protein flexibility.
+#Thus, AA with the highest occurrences are responsible for the protein structure stability (L, A) and flexibility (G). 
+
+
+### Task 2.6 ###

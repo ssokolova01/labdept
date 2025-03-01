@@ -36,3 +36,19 @@ print("Top 5 Upregulated Genes:", up_gene_list)
 top_down_genes = downregulated_genes.sort_values(by='log2FoldChange', ascending=True).head(5)
 down_gene_list = top_down_genes['Gene'].tolist()
 print("Top 5 Downregulated Genes:", down_gene_list)
+
+#Top 5 upregulated genes:
+#"DTHD1"   "EMILIN2" "PI16"    "C4orf45" "FAM180B"
+#DTHD1 (Death Domain-Containing Protein 1): Function in signaling pathways and formation of signaling complexes, as well as the apoptosis pathway.
+#EMILIN2 (Elastin Microfibril Interface-Located Protein 2): Enables extracellular matrix constituent conferring elasticity; involved in positive regulation of angiogenesis, of defense response to bacterium and of positive regulation of platelet aggregation.
+#PI16 (Peptidase Inhibitor 16 ): Negative regulation of peptidase activity; negative regulation of cell growth involved in cardiac muscle cell development.
+#C4orf45 (Sperm Microtubule Inner Protein 2):  Associated with hyperekplexia neurological disease with disturbed muscle functioning.
+#FAM180B (Family With Sequence Similarity 180 Member B): Predicted to be located in extracellular region. Associated with Borderline leprosy infectious disease and Mosaic Variegated Aneuploidy Syndrome which is a rare chromosomal anomaly, leading to various phenotypic abnormalities and an increased risk of cancer.
+
+#Top 5 downregulated genes:
+#'TBX5', 'IFITM1', 'TNN', 'COL13A1', 'IFITM3'
+#TBX5 (T-Box Transcription Factor 5): a member of a phylogenetically conserved family of genes that share a common DNA-binding domain, the T-box. T-box genes encode transcription factors involved in the regulation of developmental processes.
+#IFITM1 (Interferon Induced Transmembrane Protein 1): a family of interferon induced antiviral proteins. The protein encoded by this gene restricts cellular entry by diverse viral pathogens, such as influenza A virus, Ebola virus and Sars-CoV-2.
+#TNN (Tenascin N): Predicted to enable integrin binding activity. Involved in positive regulation of sprouting angiogenesis; regulation of cell adhesion; and regulation of cell migration.
+#COL13A1 (Collagen Type XIII Alpha 1 Chain): The function of this gene product is not known, it may serve a general function in connective tissues.
+#IFITM3 (Interferon Induced Transmembrane Protein 3): Interferon-induced transmembrane (IFITM) proteins are a family of interferon induced antiviral proteins. The protein encoded by this gene restricts cellular entry by diverse viral pathogens, such as influenza A virus, Ebola virus and Sars-CoV-2.

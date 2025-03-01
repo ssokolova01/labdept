@@ -55,6 +55,17 @@ plt.pie(amino_acid_freq_x['Frequency'], labels=amino_acid_freq_x['Amino_Acid'],
 plt.title("Amino Acid Frequency Distribution (Pie Chart)", fontsize=14)
 plt.show()
 
+#Amino acid with the highest impact on protein structure and function: G (Glycine)
+#Glycine's impact on protein structure and function:
+#Slycine is the smallest AA which enables it to fold into a compact structure. That is used in collagen which can fold into a triple helix structure. Glycine provides flexibility for enzyme active sites.
+
 #Find amino acids with Frequency more than 100 occurrence.
 high_occurrence_aa = amino_acid_freq_x[amino_acid_freq_x['Frequency'] > 100]
 print(high_occurrence_aa)
+
+#Structural and functional properties of amino acids with more than 100 occurrences.
+#AA with occurrences > 100 (13): G (Glycine), L (Leucine), A (Alanine), P (Proline), V (Valine), R (Arginine), I (Isoleucine), Y (Tyrosine), D (Aspattic acid), F (Phenylalanine), S (Serine), T (Threonine), W (Tryptophane). 
+#Hydrophobic amino acids (L, A, P, V, I, F, W) stabilize the protein core. Polar and charged amino acids (R, Y, D, S, T) participate in catalysis, signaling, and interactions. Proline (P) and glycine (G) uniquely affect protein flexibility.
+#G is small and flexible, it disrupts secondary structures so that it increases conformational flexibility. L, I, V, A are hydrophobic and they are essential for structural integrity. Proline is rigid and it disrupts helices, so that it forces bends in protein. R, D are charged and involved in salted bridges; they are key for enzimatic reactions and protein interactions. Y, W, F have aromatic structure which results into stacking of interactions; they are important for signaling and enzyme active sites. Serine and Threonine are polar which allow them to form hydrogen bonds; they are crucial for phosphorylation and regulation processes.
+#Conclusion. Hydrophobic amino acids (L, A, P, V, I, F, W) stabilize the protein core. Polar and charged amino acids (R, Y, D, S, T) participate in catalysis, signaling, and interactions. Proline and glycine uniquely affect protein flexibility.
+#Thus, AA with the highest occurrences are responsible for the protein structure stability (L, A) and flexibility (G). 

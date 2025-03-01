@@ -189,3 +189,128 @@ print(high_occurrence_aa)
 
 
 ### Task 2.6 ###
+import pandas as pd
+import seaborn as sns
+import numpy as np
+import matplotlib.pyplot as plt
+
+#Import the gene expression dataset
+data = "https://gist.githubusercontent.com/stephenturner/806e31fce55a8b7175af/raw/1a507c4c3f9f1baaa3a69187223ff3d3050628d4/results.txt"
+#Read the dataset
+df = pd.read_csv(data, sep = r'\s+')
+
+#Create a neg_log10_pvalue for further volcano plot visualisation for scalability and better data representation
+df['neg_log10_pvalue'] = -np.log10(df['pvalue'])
+
+#Volcano plot visualisation
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x='log2FoldChange', y='neg_log10_pvalue', data=df,
+        hue=df['padj'] < 0.05, palette={True: 'red', False: 'black'}, s=80)plt.title('Volcano Plot')
+plt.xlabel('Log2 Fold Change')
+plt.ylabel('-Log10 P-value')
+plt.legend(title='Significance', labels=['Non-Significant', 'Significant'])
+plt.grid(True)
+plt.show()
+
+#Filtering gene expression data by log2FoldChange and pvalue parameters to find upregulated genes.
+upregulated_genes = df[(df['log2FoldChange'] > 1) & (df['pvalue'] < 0.01)]
+
+#Filtering gene expression data by log2FoldChange and pvalue parameters to find downregulated genes.
+downregulated_genes = df[(df['log2FoldChange'] < -1) & (df['pvalue'] < 0.01)]
+
+#Sorting top 5 upregulated genes according their log2FoldChange.
+top_up_genes = upregulated_genes.sort_values(by='log2FoldChange', ascending=False).head(5)
+up_gene_list = top_up_genes['Gene'].tolist()
+print("Top 5 Upregulated Genes:", up_gene_list)
+
+#Sorting top 5 downregulated genes according their log2FoldChange.
+top_down_genes = downregulated_genes.sort_values(by='log2FoldChange', ascending=True).head(5)
+down_gene_list = top_down_genes['Gene'].tolist()
+print("Top 5 Downregulated Genes:", down_gene_list)
+
+#Top 5 upregulated genes:
+#"DTHD1"   "EMILIN2" "PI16"    "C4orf45" "FAM180B"
+#DTHD1 (Death Domain-Containing Protein 1): Function in signaling pathways and formation of signaling complexes, as well as the apoptosis pathway.
+#EMILIN2 (Elastin Microfibril Interface-Located Protein 2): Enables extracellular matrix constituent conferring elasticity; involved in positive regulation of angiogenesis, of defense response to bacterium and of positive regulation of platelet aggregation.
+#PI16 (Peptidase Inhibitor 16 ): Negative regulation of peptidase activity; negative regulation of cell growth involved in cardiac muscle cell development.
+#C4orf45 (Sperm Microtubule Inner Protein 2):  Associated with hyperekplexia neurological disease with disturbed muscle functioning.
+#FAM180B (Family With Sequence Similarity 180 Member B): Predicted to be located in extracellular region. Associated with Borderline leprosy infectious disease and Mosaic Variegated Aneuploidy Syndrome which is a rare chromosomal anomaly, leading to various phenotypic abnormalities and an increased risk of cancer.
+
+#Top 5 downregulated genes:
+#'TBX5', 'IFITM1', 'TNN', 'COL13A1', 'IFITM3'
+#TBX5 (T-Box Transcription Factor 5): a member of a phylogenetically conserved family of genes that share a common DNA-binding domain, the T-box. T-box genes encode transcription factors involved in the regulation of developmental processes.
+#IFITM1 (Interferon Induced Transmembrane Protein 1): a family of interferon induced antiviral proteins. The protein encoded by this gene restricts cellular entry by diverse viral pathogens, such as influenza A virus, Ebola virus and Sars-CoV-2.
+#TNN (Tenascin N): Predicted to enable integrin binding activity. Involved in positive regulation of sprouting angiogenesis; regulation of cell adhesion; and regulation of cell migration.
+#COL13A1 (Collagen Type XIII Alpha 1 Chain): The function of this gene product is not known, it may serve a general function in connective tissues.
+#IFITM3 (Interferon Induced Transmembrane Protein 3): Interferon-induced transmembrane (IFITM) proteins are a family of interferon induced antiviral proteins. The protein encoded by this gene restricts cellular entry by diverse viral pathogens, such as influenza A virus, Ebola virus and Sars-CoV-2.
+
+
+### Task 2.7 ###
+import pandas as pd
+import seaborn as sns
+from scipy import stats
+
+# Load the dataset
+df = pd.read_csv('https://github.com/HackBio-Internship/public_datasets/raw/refs/heads/main/R/nhanes.csv')
+
+# Drop rows with missing values
+df = df.dropna()
+
+# Convert weight to pounds
+df['WeightPounds'] = df['Weight'] * 2.2
+
+# Calculate mean pulse
+mean_pulse = df['Pulse'].mean()
+print(f'Mean 60-second pulse rate: {mean_pulse}')
+
+# Calculate diastolic blood pressure range
+bp_dia_range = df['BPDia'].min(), df['BPDia'].max()
+print(f'Diastolic blood pressure range: {bp_dia_range}')
+
+# Calculate income variance and standard deviation
+income_variance = df['Income'].var()
+income_std = df['Income'].std()
+print(f'Income variance: {income_variance}, standard deviation: {income_std}')
+
+# Visualize distributions (using seaborn's FacetGrid)
+cols = ['BMI', 'Weight', 'WeightPounds', 'Age']
+for col in cols:
+    g = sns.displot(df[col], kde=True)
+    g.fig.suptitle(f'Distribution of {col}')
+    print(g)
+
+# Visualize weight-height relationship
+g = sns.relplot(x='Weight', y='Height', data=df)
+g.fig.suptitle('Weight vs Height')
+print(g)
+
+# Color by gender
+g = sns.relplot(x='Weight', y='Height', hue='Gender', data=df)
+g.fig.suptitle('Weight vs Height (colored by gender)')
+print(g)
+
+# Color by diabetes
+g = sns.relplot(x='Weight', y='Height', hue='Diabetes', data=df)
+g.fig.suptitle('Weight vs Height (colored by diabetes)')
+print(g)
+
+# Color by smoking status
+g = sns.relplot(x='Weight', y='Height', hue='SmokingStatus', data=df)
+g.fig.suptitle('Weight vs Height (colored by smoking status)')
+print(g)
+
+# T-tests
+age_gender_ttest = stats.ttest_ind(
+    df[df['Gender'] == 'male']['Age'], df[df['Gender'] == 'female']['Age']
+)
+bmi_diabetes_ttest = stats.ttest_ind(
+    df[df['Diabetes'] == 'Yes']['BMI'], df[df['Diabetes'] == 'No']['BMI']
+)
+alcohol_relationship_ttest = stats.ttest_ind(
+    df[df['RelationshipStatus'] == 'Single']['AlcoholYear'],
+    df[df['RelationshipStatus'] == 'Committed']['AlcoholYear'],
+)
+
+print(f'T-test Age vs Gender: {age_gender_ttest}')
+print(f'T-test BMI vs Diabetes: {bmi_diabetes_ttest}')
+print(f'T-test AlcoholYear vs RelationshipStatus: {alcohol_relationship_ttest

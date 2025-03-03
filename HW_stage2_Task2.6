@@ -16,7 +16,7 @@ volcano_plot = sns.relplot(
     data=df,
     x="log2FoldChange",
     y="neg_log10_pvalue",
-    hue=df["padj"] < 0.05,
+    hue=df["padj"] < 0.01,
     palette={True: "red", False: "black"},
     s=80,
     height=6, aspect=1.5

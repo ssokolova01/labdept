@@ -12,15 +12,19 @@ df = pd.read_csv(data, sep = r'\s+')
 df['neg_log10_pvalue'] = -np.log10(df['pvalue'])
 
 #Volcano plot visualisation
-plt.figure(figsize=(10, 6))
-sns.scatterplot(x='log2FoldChange', y='neg_log10_pvalue', data=df,
-        hue=df['padj'] < 0.05, palette={True: 'red', False: 'black'}, s=80)
-plt.title('Volcano Plot')
-plt.xlabel('Log2 Fold Change')
-plt.ylabel('-Log10 P-value')
-plt.legend(title='Significance', labels=['Non-Significant', 'Significant'])
-plt.grid(True)
-plt.show()
+sns.set(style="whitegrid")
+volcano_plot = sns.relplot(
+    data=df,
+    x="log2FoldChange",
+    y="neg_log10_pvalue",
+    hue=df["padj"] < 0.05,
+    palette={True: "red", False: "black"},
+    s=80,
+    height=6, aspect=1.5
+)
+volcano_plot.set_axis_labels("Log2 Fold Change", "-Log10 P-value")
+volcano_plot.fig.suptitle("Volcano Plot", fontsize=14)
+volcano_plot.figure.show()
 
 #Filtering gene expression data by log2FoldChange and pvalue parameters to find upregulated genes.
 upregulated_genes = df[(df['log2FoldChange'] > 1) & (df['pvalue'] < 0.01)]

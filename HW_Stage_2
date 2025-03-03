@@ -115,6 +115,7 @@ for strain in df['Strain'].unique():
     print(g)
 
 ### Task 2.4 ###
+import pandas as pd
 #Import two datasets: SIFT and FoldX
 data_source_sift = "https://raw.githubusercontent.com/HackBio-Internship/public_datasets/main/R/datasets/sift.tsv"
 data_source_foldx = "https://raw.githubusercontent.com/HackBio-Internship/public_datasets/main/R/datasets/foldX.tsv"

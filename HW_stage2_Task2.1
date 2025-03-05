@@ -1,1 +1,116 @@
+### Task 2.1 ###
+import pandas as pd
+import scipy.stats as stats
+import seaborn as sns
+
+# Load the data
+df = pd.read_csv('https://raw.githubusercontent.com/HackBio-Internship/2025_project_collection/main/Python/Dataset/seaborn_microbe.csv')
+
+"""
+    I try many times to load the dataset from github but still get the same error that the file doesn't exist,
+    I do some research and turn out that it is not possible to load the dataset usimg directly the link path from github, so we have to change it a little bit
+        by replacing the address of git to raw.githubusercontent.
+    """
+
+# Define a function to calculate the carrying capacity and time to reach it
+def calculate_carrying_capacity(df):
+    """
+    This function calculates the carrying capacity and the time to reach it for each strain in the dataframe.
+    The function from the next din't really work with this task since the columns are already established in the dataset so it is not necessary to create them.
+        """
+
+    carrying_capacities = []
+    for strain in df['Strain'].unique():
+        for condition in df['Condition'].unique():
+            subset = df[(df['Strain'] == strain) & (df['Condition'] == condition)]
+            max_od600 = subset['OD600'].max()
+            time_to_max_od600 = subset.loc[subset['OD600'].idxmax(), 'Time']
+            carrying_capacities.append(
+                {
+                    'Strain': strain,
+                    'Condition': condition,
+                    'Carrying Capacity': max_od600,
+                    'Time to Carrying Capacity': time_to_max_od600,
+                }
+            )
+    return pd.DataFrame(carrying_capacities)
+    """Returns:
+        pandas.DataFrame: A dataframe with the carrying capacity and time to reach it for each strain.
+    """
+
+# Calculate the carrying capacity and time to reach it for each strain
+carrying_capacity_df = calculate_carrying_capacity(df)
+
+# Convert 'Time to Carrying Capacity' to numeric
+carrying_capacity_df['Time to Carrying Capacity'] = pd.to_numeric(
+    carrying_capacity_df['Time to Carrying Capacity'], errors='coerce'
+)
+
+# Drop rows with N/A values
+carrying_capacity_df = carrying_capacity_df.dropna(subset=['Time to Carrying Capacity'])
+"""
+I decide to drop the N/A value instead of replacimg them with zero
+        It allow us to use a few data instead and the resolution is simplier.
+    """
+
+# Plot the growth curves using seaborn relational plot
+for strain in df['Strain'].unique():
+    g = sns.relplot(
+        data=df[df['Strain'] == strain],
+        x='Time',
+        y='OD600',
+        hue='Condition',
+        kind='line',
+    )
+    g.fig.suptitle(f'Growth curve for {strain}')
+    g.fig.subplots_adjust(top=0.9)  # Adjust title position
+    g.refline(y=0)  # Add a horizontal line at y=0
+    print(f"Growth Curve for {strain}:")
+    print(g)
+
+# statistical t-test
+for strain in df['Strain'].unique():
+    conditions = df['Condition'].unique()
+    condition1 = carrying_capacity_df[
+        (carrying_capacity_df['Strain'] == strain)
+        & (carrying_capacity_df['Condition'] == conditions[0])
+    ]['Time to Carrying Capacity']
+    condition2 = carrying_capacity_df[
+        (carrying_capacity_df['Strain'] == strain)
+        & (carrying_capacity_df['Condition'] == conditions[1])
+    ]['Time to Carrying Capacity']
+    t_stat, p_val = stats.ttest_ind(condition1, condition2, equal_var=False)
+    print(f'T-test results for {strain}:')
+    print(f'T-statistic: {t_stat:.3f}')
+    print(f'P-value: {p_val:.3f}')
+    if p_val < 0.05:
+        print('There is a significant difference between the two conditions.\n')
+    else:
+        print('There is no significant difference between the two conditions.\n')
+
+# loop over each strain for scatter plots
+for strain in df['Strain'].unique():
+    g = sns.relplot(
+        x='Condition',
+        y='Time to Carrying Capacity',
+        data=carrying_capacity_df[carrying_capacity_df['Strain'] == strain],
+        kind='scatter',
+    )
+    g.fig.suptitle(f'Time to carrying capacity for {strain}')
+    g.fig.subplots_adjust(top=0.9)
+    print(f"Scatter Plot for {strain}:")
+    print(g)
+
+# loop over each strain for box plots using categories plot
+for strain in df['Strain'].unique():
+    g = sns.catplot(
+        x='Condition',
+        y='Time to Carrying Capacity',
+        data=carrying_capacity_df[carrying_capacity_df['Strain'] == strain],
+        kind='box',
+    )
+    g.fig.suptitle(f'Time to carrying capacity for {strain}')
+    g.fig.subplots_adjust(top=0.9)
+    print(f"Box Plot for {strain}:")
+    print(g)
 

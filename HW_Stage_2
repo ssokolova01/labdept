@@ -318,4 +318,4 @@ alcohol_relationship_ttest = stats.ttest_ind(
 
 print(f'T-test Age vs Gender: {age_gender_ttest}')
 print(f'T-test BMI vs Diabetes: {bmi_diabetes_ttest}')
-print(f'T-test AlcoholYear vs RelationshipStatus: {alcohol_relationship_ttest
+print(f'T-test AlcoholYear vs RelationshipStatus: {alcohol_relationship_ttest}')

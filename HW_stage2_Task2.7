@@ -1,1 +1,70 @@
+### Task 2.7 ###
 
+import pandas as pd
+import seaborn as sns
+from scipy import stats
+
+# Load the dataset
+df = pd.read_csv('https://github.com/HackBio-Internship/public_datasets/raw/refs/heads/main/R/nhanes.csv')
+
+# Fill rows with missing value
+df= df.fillna(0)
+
+# Convert weight to pounds
+df['WeightPounds'] = df['Weight'] * 2.2
+
+# Calculate mean pulse
+mean_pulse = df['Pulse'].mean()
+print(f'Mean 60-second pulse rate: {mean_pulse}')
+
+# Calculate diastolic blood pressure range
+bp_dia_range = df['BPDia'].min(), df['BPDia'].max()
+print(f'Diastolic blood pressure range: {bp_dia_range}')
+
+# Calculate income variance and standard deviation
+income_variance = df['Income'].var()
+income_std = df['Income'].std()
+print(f'Income variance: {income_variance}, standard deviation: {income_std}')
+
+# Visualize distributions (using seaborn's FacetGrid)
+cols = ['BMI', 'Weight', 'WeightPounds', 'Age']
+for col in cols:
+    g = sns.displot(df[col], kde=True)
+    g.fig.suptitle(f'Distribution of {col}')
+    print(g)
+
+# Visualize weight-height relationship
+g = sns.relplot(x='Weight', y='Height', data=df)
+g.fig.suptitle('Weight vs Height')
+print(g)
+
+# Color by gender
+g = sns.relplot(x='Weight', y='Height', hue='Gender', data=df)
+g.fig.suptitle('Weight vs Height (colored by gender)')
+print(g)
+
+# Color by diabetes
+g = sns.relplot(x='Weight', y='Height', hue='Diabetes', data=df)
+g.fig.suptitle('Weight vs Height (colored by diabetes)')
+print(g)
+
+# Color by smoking status
+g = sns.relplot(x='Weight', y='Height', hue='SmokingStatus', data=df)
+g.fig.suptitle('Weight vs Height (colored by smoking status)')
+print(g)
+
+# T-tests
+age_gender_ttest = stats.ttest_ind(
+    df[df['Gender'] == 'male']['Age'], df[df['Gender'] == 'female']['Age']
+)
+bmi_diabetes_ttest = stats.ttest_ind(
+    df[df['Diabetes'] == 'Yes']['BMI'], df[df['Diabetes'] == 'No']['BMI']
+)
+alcohol_relationship_ttest = stats.ttest_ind(
+    df[df['RelationshipStatus'] == 'Single']['AlcoholYear'],
+    df[df['RelationshipStatus'] == 'Committed']['AlcoholYear'],
+)
+
+print(f'T-test Age vs Gender: {age_gender_ttest}')
+print(f'T-test BMI vs Diabetes: {bmi_diabetes_ttest}')
+print(f'T-test AlcoholYear vs RelationshipStatus: {alcohol_relationship_ttest}')

@@ -1,0 +1,147 @@
+#### First function ####
+def dna_to_protein(dna_sequence):    codon_table = {
+        'UUU': 'F', 'UUC': 'F', 'UUA': 'L', 'UUG': 'L', 'UCU': 'S', 'UCC': 'S',
+        'UCA': 'S', 'UCG': 'S', 'UAU': 'Y', 'UAC': 'Y', 'UAA': '*', 'UAG': '*',
+        'UGU': 'C', 'UGC': 'C', 'UGA': '*', 'UGG': 'W', 'CUU': 'L', 'CUC': 'L',
+        'CUA': 'L', 'CUG': 'L', 'CCU': 'P', 'CCC': 'P', 'CCA': 'P', 'CCG': 'P',
+        'CAU': 'H', 'CAC': 'H', 'CAA': 'Q', 'CAG': 'Q', 'CGU': 'R', 'CGC': 'R',
+        'CGA': 'R', 'CGG': 'R', 'AUU': 'I', 'AUC': 'I', 'AUA': 'I', 'AUG': 'M',
+        'ACU': 'T', 'ACC': 'T', 'ACA': 'T', 'ACG': 'T', 'AAU': 'N', 'AAC': 'N',
+        'AAA': 'K', 'AAG': 'K', 'AGU': 'S', 'AGC': 'S', 'AGA': 'R', 'AGG': 'R',
+        'GUU': 'V', 'GUC': 'V', 'GUA': 'V', 'GUG': 'V', 'GCU': 'A', 'GCC': 'A',
+        'GCA': 'A', 'GCG': 'A', 'GAU': 'D', 'GAC': 'D', 'GAA': 'E', 'GAG': 'E',
+        'GGU': 'G', 'GGC': 'G', 'GGA': 'G', 'GGG': 'G'
+    }    rna_sequence = ""
+    for base in dna_sequence:
+        if base == "A":
+            rna_sequence += "U"
+        elif base == "T":
+            rna_sequence += "A"
+        elif base == "C":
+            rna_sequence += "G"
+        elif base == "G":
+            rna_sequence += "C"    protein_sequence = ""
+    for i in range(0, len(rna_sequence), 3):
+        codon = rna_sequence[i:i + 3]
+        if codon in codon_table:
+            amino_acid = codon_table[codon]
+            protein_sequence += amino_acid    return protein_sequence# #Example:
+dna = "ATGGTCCATCAAGCCATC" 
+protein = dna_to_protein(dna)
+print(f"DNA: {dna}")
+print(f"Protein: {protein}")
+
+#### Second function ####
+import random
+import mathdef logistic_growth(P0, K, r, time_steps, lag_phase_max, exp_phase_max):
+    # Simulates and returns a logistic population growth curve with randomized lag and exponential phases.    
+    # Parameters:
+    # P0 (float): Initial population size
+    # K (float): Carrying capacity (max population)
+    # r (float): Growth rate
+    # time_steps (int): Number of time steps to simulate
+    # lag_phase_max (int): Maximum possible duration for the lag phase (randomized)
+    # exp_phase_max (int): Maximum possible duration for the exponential phase (randomized)    # Returns:
+    # list: Population values over time    # Randomly determine lag phase and exponential growth phase durations
+    lag_phase_duration = random.randint(1, lag_phase_max)
+    exp_phase_duration = random.randint(lag_phase_duration + 1, exp_phase_max)    # Time array and population storage
+    P = [0] * time_steps    for i in range(time_steps):
+        if i < lag_phase_duration:
+            # Lag Phase: Minimal growth
+            P[i] = P0 * (1 + 0.005 * i)
+        elif i < exp_phase_duration:
+            # Exponential Growth Phase
+            P[i] = K / (1 + ((K - P0) / P0) * math.exp(-r * (i - lag_phase_duration)))
+        else:
+            # Logistic Growth Phase (Saturation)
+            P[i] = K / (1 + ((K - P[exp_phase_duration-1]) / P[exp_phase_duration-1]) * math.exp(-r * (i - exp_phase_duration)))    return P# Generate 100 different growth curves
+num_curves = 100
+time_steps = 100  # Number of time steps
+data = []# Generate the data for each curve
+for i in range(num_curves):
+    P0 = random.randint(5, 50)      # Random initial population
+    K = random.randint(500, 2000)   # Random carrying capacity
+    r = random.uniform(0.1, 0.5)    # Random growth rate
+    lag_phase_max = random.randint(5, 20)  # Random max lag phase
+    exp_phase_max = random.randint(30, 60)  # Random max exponential phase    growth_curve = logistic_growth(P0, K, r, time_steps, lag_phase_max, exp_phase_max)
+    data.append(growth_curve)# Now, 'data' contains 100 growth curves, each a list of 100 time steps.
+# To mimic a DataFrame, we'll print it out as rows (each row corresponds to one curve)
+for i in range(num_curves):
+    print(f"Curve {i+1}: {data[i]}")
+
+#### Third function ####
+import random
+def logistic_growth(t, K, r, N0, lag_phase, exp_phase):
+    """
+    Simulates logistic growth with randomized lag and exponential phase durations.
+    :param t: List of time points
+    :param K: Carrying capacity
+    :param r: Growth rate
+    :param N0: Initial population size
+    :param lag_phase: Duration of the lag phase
+    :param exp_phase: Duration of the exponential phase
+    :return: List of population sizes at each time point
+    """
+    N = []
+    
+    for time in t:
+        if time < lag_phase:
+            N.append(N0)  # Lag phase, no significant growth
+        elif time < lag_phase + exp_phase:
+            # Exponential growth phase
+            Nt = N0 * (2.718 ** (r * (time - lag_phase)))
+            N.append(Nt)
+        else:
+            # Logistic growth phase
+            Nt = (K * N0 * (2.718 ** (r * (time - lag_phase - exp_phase)))) / \
+                 (K + N0 * ((2.718 ** (r * (time - lag_phase - exp_phase))) - 1))
+            N.append(min(Nt, K))  # Enforce carrying capacity
+    
+    return N
+
+def time_to_80_percent_K(t, N, K):
+    """
+    Determines the time at which the population reaches 80% of carrying capacity.
+    :param t: List of time points
+    :param N: List of population sizes
+    :param K: Carrying capacity
+    :return: Time to reach 80% of K
+    """
+    threshold = 0.8 * K
+    for i, pop in enumerate(N):
+        if pop >= threshold:
+            return t[i]
+    return None  # If not reached within the given time
+
+# Parameters
+K = 1000  # Carrying capacity
+r = 0.2  # Growth rate
+N0 = 10  # Initial population size
+time = [i for i in range(101)]  # Time array from 0 to 100
+# Randomized lag and exponential phases
+lag_phase = random.uniform(5, 15)
+exp_phase = random.uniform(10, 25)
+# Generate growth curve
+N = logistic_growth(time, K, r, N0, lag_phase, exp_phase)
+# Determine time to reach 80% of K
+time_80_K = time_to_80_percent_K(time, N, K)
+# Print results
+print("Time to reach 80% of carrying capacity:", time_80_K)
+print("Growth Curve Data:")
+for t, n in zip(time, N):
+    print(f"Time: {t}, Population: {n}")
+
+#### Fourth function ####
+xusername = ["ebube_adiele1", "svetlana", "hariv"]
+slackusername = ["Ebubechiokike", "Svetlana", "Hajah"]# Function to calculate the Hamming distance
+def hamming_distance(str1, str2):
+    # Ensure both strings are of equal length
+    length = min(len(str1), len(str2))    # Calculate the Hamming distance
+    distance = 0
+    for i in range(length):
+        if str1[i].lower() != str2[i].lower():  # Case insensitive comparison
+            distance += 1
+    return distance# Iterate through both lists and calculate Hamming distance for each pair
+for i in range(len(xusername)):
+    dist = hamming_distance(xusername[i], slackusername[i])
+    print(f"Hamming distance between '{xusername[i]}' and '{slackusername[i]}': {dist}")

@@ -1,1 +1,379 @@
+# TASK:
+#Anatomy and Physiology [Cancer]
+# •	Look at this dataset
+# •	How do you distinguish benign from malignant datasets?
+# •	Using PCA and K-Mean clustering, classify and cluster the patients.
+# •	Do you think there are other subclasses within the dataset?
+
+# Question 1. Dataset Overview.
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load dataset
+url = 'https://raw.githubusercontent.com/PacktPublishing/Machine-Learning-in-Biotechnology-and-Life-Sciences/refs/heads/main/datasets/dataset_wisc_sd.csv'
+df = pd.read_csv(url)
+
+# BASIC INFO
+print("Dataset Overview:")
+print(df.info())
+
+# FIRST FEW ROWS
+print("\n First 5 Rows:")
+print(df.head())
+
+# CHECK FOR MISSING VALUES
+print("\n Missing Values Per Column:")
+print(df.isnull().sum())
+
+# CHECK UNIQUE VALUES IN TARGET
+print ("\n Target variable distribution (Diagnosis):")
+print(df['diagnosis'].value_counts())
+
+#VISUALISATION
+plt.figure(figsize=(6, 4))
+sns.countplot(data=df, x='Diagnosis', palette='Set2')
+plt.title('Count of Diagnosis Classes (Benign vs Malignant)')
+plt.show()
+
+# Main results: 
+# 1) The dataset consists of 32 columns and 569 rows. 
+# 2) Missing values were found in the columns: area_mean (2), radius_se (3), fractal_dimension_se (1), smoothness_worst (1).
+# 3) Diagnosis distribution is: 212 cases for Malignant and 357 cases for Benign. (graph image: https://github.com/ssokolova01/labdept/issues/1#issue-3010338651)
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Question 2. Distinguish benign and malignant dataset.
+
+# The "diagnosis" column contains the labels indicating whether a tumor is benign or malignant.
+# Supervised classification was performed to distinguish Malignant and Benign cases using two models: 
+# Logistic Regression and Random Forest. They suit to categories (Malignant and Benign) while Linear Regression suit for continuous values.
+# The "diagnosis" column serves as the target variable used to distinguish between malignant and benign cases.
+# All other columns, except "id" and "diagnosis", are numeric features — 30 in total — describing tumor characteristics.
+# A comparison of model performance was conducted to evaluate the effectiveness of both classification methods.
+
+# Data preprocessing is the first step to delete NA and drop irrelevant feature (id).
+df = df.drop(columns=['id'])
+df['concave points_worst'] = pd.to_numeric(df['concave points_worst'], errors='coerce')
+df = df.dropna()
+df['diagnosis'] = df['diagnosis'].map({'B': 0, 'M': 1})
+
+# Split features and target
+X = df.drop(columns=['diagnosis'])
+y = df['diagnosis']
+
+# Split dataset
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Scale features
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Feature Selection - Random Forest
+from sklearn.feature_selection import RFE
+from sklearn.ensemble import RandomForestClassifier
+
+rf_model = RandomForestClassifier(random_state=42)
+rf_selector = RFE(rf_model, n_features_to_select=10)
+rf_selector.fit(X_train_scaled, y_train)
+selected_features_rf = X.columns[rf_selector.support_]
+print("Top 10 Features Selected by Random Forest:\n", selected_features_rf)
+
+# Feature Selection - Logistic Regression
+from sklearn.linear_model import LogisticRegression
+
+log_model = LogisticRegression(solver='liblinear', max_iter=1000)
+log_selector = RFE(log_model, n_features_to_select=10)
+log_selector.fit(X_train_scaled, y_train)
+selected_features_logreg = X.columns[log_selector.support_]
+print("Top 10 Features Selected by Logistic Regression:\n", selected_features_logreg)
+
+# Prepare Data for Each Model
+# Random Forest
+X_train_rf = X_train[selected_features_rf]
+X_test_rf = X_test[selected_features_rf]
+X_train_rf_scaled = scaler.fit_transform(X_train_rf)
+X_test_rf_scaled = scaler.transform(X_test_rf)
+
+# Logistic Regression
+X_train_logreg = X_train[selected_features_logreg]
+X_test_logreg = X_test[selected_features_logreg]
+X_train_logreg_scaled = scaler.fit_transform(X_train_logreg)
+X_test_logreg_scaled = scaler.transform(X_test_logreg)
+
+# Train and Evaluate Models
+from sklearn.metrics import classification_report
+
+# Random Forest
+rf_model.fit(X_train_rf_scaled, y_train)
+rf_pred = rf_model.predict(X_test_rf_scaled)
+print("\n Random Forest Performance:\n", classification_report(y_test, rf_pred))
+
+# Logistic Regression
+log_model.fit(X_train_logreg_scaled, y_train)
+log_pred = log_model.predict(X_test_logreg_scaled)
+print("\n Logistic Regression Performance:\n", classification_report(y_test, log_pred))
+
+Results of comparing Random Forest and Logistic Regression models based on their ability to distinguish benign (0) from malignant (1) tumors using their top 10 selected features.
+---------------------------------------------------------------------------------------------------
+OUTPUT
+---------------------------------------------------------------------------------------------------
+Terminal Output
+
+Top 10 Features Selected by Random Forest:
+ Index(['perimeter_mean', 'concavity_mean', 'concave points_mean', 'area_se',
+       'radius_worst', 'texture_worst', 'perimeter_worst', 'area_worst',
+       'concavity_worst', 'concave points_worst'],
+      dtype='object')
+Top 10 Features Selected by Logistic Regression:
+ Index(['compactness_mean', 'concave points_mean', 'radius_se', 'radius_worst',
+       'texture_worst', 'perimeter_worst', 'area_worst', 'smoothness_worst',
+       'concavity_worst', 'concave points_worst'],
+      dtype='object')
+
+ Random Forest Performance:
+               precision    recall  f1-score   support
+
+           0       0.93      0.99      0.96        68
+           1       0.98      0.89      0.93        45
+
+    accuracy                           0.95       113
+   macro avg       0.95      0.94      0.94       113
+weighted avg       0.95      0.95      0.95       113
+
+
+ Logistic Regression Performance:
+               precision    recall  f1-score   support
+
+           0       0.96      1.00      0.98        68
+           1       1.00      0.93      0.97        45
+
+    accuracy                           0.97       113
+   macro avg       0.98      0.97      0.97       113
+weighted avg       0.97      0.97      0.97       113
+
+# Both Random Forest and Logistic Regression perform well in classifying breast cancer cases using their top 10 features.  
+# Logistic Regression slightly outperforms Random Forest on overall accuracy, precision and recall for malignant cases and F1-score for malignant cases.
+# This means that Logistic Regression made fewer mistakes on malignant cases which is very important in medical settings, where catching malignant tumours early is crucial.
+# Logistic Regression might be safer in terms of minimising false negatives (missing a cancer case).
+# Tumours: Benign tumors are detected nearly perfectly in both models; Malignant tumors are detected better by Logistic Regression, which is crucial for diagnosis.
+# Thus, Logistic Regression is particularly valuable in a medical diagnostic setting, where minimizing false negatives is critical.
+********************************************************************************************************************************
+# Visualise Feature Importances
+
+# Random Forest Feature Importance
+rf_importances = pd.Series(rf_model.feature_importances_, index=selected_features_rf).sort_values(ascending=False)
+
+plt.figure(figsize=(8, 5))
+sns.barplot(x=rf_importances.values, y=rf_importances.index)
+plt.title("Random Forest - Feature Importances")
+plt.xlabel("Importance Score")
+plt.tight_layout()
+plt.show()
+
+# Random Forest feature importance visualisation: https://github.com/ssokolova01/labdept/issues/1#issuecomment-2820790923
+
+# Logistic Regression Coefficients
+log_coefficients = pd.Series(log_model.coef_[0], index=selected_features_logreg).sort_values()
+
+plt.figure(figsize=(8, 5))
+log_coefficients.plot(kind='barh', color='teal')
+plt.title("Logistic Regression - Feature Coefficients")
+plt.xlabel("Coefficient Value")
+plt.tight_layout()
+plt.show()
+
+# Logistic Regression feature importance visualisation: https://github.com/ssokolova01/labdept/issues/1#issuecomment-2820791688
+
+# These visualisations complement each other in explaining the model's logic.
+# The Logistic Regression coefficients provide insights into which features push the prediction toward benign or malignant. 
+# For example, features like concave points_worst and area_worst have strong positive coefficients, indicating they are associated with malignant tumors.
+# Random Forest ranks features by their overall impact on decision-making, highlighting radius_worst, concavity_worst, and perimeter_worst as top contributors. 
+# Both models shows the importance of the following features: radius_worst, area_worst, concave_points_worst, perimeter_worst, concave_points_mean.
+*************************************************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+Question 3. PCA and K-Mean clustering.
+
+# Explanatory Note: in this question I tried to perform 2 possible sequences of the clustering analysis: K-Mean --> PCA and PCA --> K-Mean.
+# K-mean and PCA methods belong to the unsupervised classification. 
+# K-Means clustering does not use dataset's diagnosis labels (two categories: benign and malignant), but groups data solely based on feature patterns. 
+# K-Mean --> PCA option: in this case clustering happens in original full feature space, and PCA is used just to visualise the results.
+# So, results show how do the original clusters look when projected to lower dimensions. 
+# PCA --> K-Mean option: in this case clustering happens in lower-dimensional space.
+# So, result show the natural groups that exist in the reduced feature space.
+
+VERSION 1: K-Mean --> PCA option
+
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+
+# Downloading and preprocessing the dataset
+url = "https://raw.githubusercontent.com/PacktPublishing/Machine-Learning-in-Biotechnology-and-Life-Sciences/refs/heads/main/datasets/dataset_wisc_sd.csv"
+df = pd.read_csv(url)
+
+df = df.drop(columns=["id"])
+df["concave points_worst"] = pd.to_numeric(df["concave points_worst"], errors='coerce')
+df = df.dropna()
+
+diagnosis = df["diagnosis"]
+df = df.drop(columns=["diagnosis"])
+
+scaler = StandardScaler()
+scaled_data = scaler.fit_transform(df)
+
+# K-Mean clustering (for 2, 3, 4 and 5 number of clusters - separately)
+kmeans = KMeans(n_clusters=2, random_state=42)
+kmeans.fit(scaled_data)
+df["Cluster"] = kmeans.labels_
+
+kmeans = KMeans(n_clusters=3, random_state=42)
+kmeans.fit(scaled_data)
+df["Cluster"] = kmeans.labels_
+
+kmeans = KMeans(n_clusters=4, random_state=42)
+kmeans.fit(scaled_data)
+df["Cluster"] = kmeans.labels_
+
+kmeans = KMeans(n_clusters=5, random_state=42)
+kmeans.fit(scaled_data)
+df["Cluster"] = kmeans.labels_
+
+# PCA transformation and visualisation
+
+# Reduce dimensions
+pca = PCA(n_components=2)
+pca_components = pca.fit_transform(scaled_data)
+
+# Create a DataFrame for PCA results
+pca_df = pd.DataFrame(data=pca_components, columns=["PC1", "PC2"])
+pca_df["Cluster"] = df["Cluster"]
+
+# Visualisation: PCA-transformed clusters plotting
+plt.figure(figsize=(10, 6))
+for cluster_label in pca_df["Cluster"].unique():
+    cluster_data = pca_df[pca_df["Cluster"] == cluster_label]
+    plt.scatter(cluster_data["PC1"], cluster_data["PC2"], label=f"Cluster {cluster_label}")
+
+plt.title("K-Means Clustering (PCA-reduced)")
+plt.xlabel("Principal Component 1")
+plt.ylabel("Principal Component 2")
+plt.legend()
+plt.grid(True)
+plt.show()
+************************************************************************************************************
+# VISUALISATION OUTPUT
+# K-Mean 2 clusters:
+https://github.com/ssokolova01/labdept/issues/1#issuecomment-2821047027
+# K-Mean 3 clusters:
+https://github.com/ssokolova01/labdept/issues/1#issuecomment-2821047543
+# K-Mean 4 clusters:
+https://github.com/ssokolova01/labdept/issues/1#issuecomment-2821048081
+# K-Mean 5 clusters:
+https://github.com/ssokolova01/labdept/issues/1#issuecomment-2821048671
+************************************************************************************************************
+# INTERPRETATION
+# K-Means clustering was applied on the full high-dimensional dataset to group the patients based on their biological features.
+# After clustering, used PCA was used to reduce the data to two dimensions for visualisation purposes.
+# The resulting plots show how the patients in different clusters are positioned in lower-dimensional space. 
+# Each color represents a cluster assigned by the K-Means algorithm.
+# It helps identify potential hidden subtypes or biological variation within the benign and malignant diagnoses.
+# Different numbers of clusters (k=2, k=3, k=4, k=5) were assayed to explore the heterogeneity. 
+# The newly appearing cluster after increasing the k meaning can indicate the complex structure in the data such as multiple subgroups with subtle differences.
+# Also, it can be over-segmenting which happens when the algorithm slices clusters that don’t really differ much.
+# Some instability or appearance of NaN labels occurred, which should be due to misalignment as far as preprocessing dataset treatment was performed.
+# The optimal number of clusters can be found by using subsequent analysis.
+************************************************************************************************************
+
+VERSION 2: PCA --> K-Mean option
+
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+
+# Downloading and preprocessing the dataset
+url = "https://raw.githubusercontent.com/PacktPublishing/Machine-Learning-in-Biotechnology-and-Life-Sciences/refs/heads/main/datasets/dataset_wisc_sd.csv"
+df = pd.read_csv(url)
+
+df = df.drop(columns=['id'])
+df['concave points_worst'] = pd.to_numeric(df['concave points_worst'], errors='coerce')
+df = df.dropna()
+X = df.drop(columns=['diagnosis'])
+scaler = StandardScaler()
+X_full_scaled = scaler.fit_transform(X)
+
+# PCA to 2 components
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_full_scaled)
+
+# K-Means clustering (for 2, 3, 4 and 5 number of clusters - separately)
+kmeans = KMeans(n_clusters=2, random_state=42)
+clusters = kmeans.fit_predict(X_pca)
+
+kmeans = KMeans(n_clusters=3, random_state=42)
+clusters = kmeans.fit_predict(X_pca)
+
+kmeans = KMeans(n_clusters=4, random_state=42)
+clusters = kmeans.fit_predict(X_pca)
+
+kmeans = KMeans(n_clusters=5, random_state=42)
+clusters = kmeans.fit_predict(X_pca)
+
+# Visualisation
+plt.figure(figsize=(8, 6))
+plt.scatter(X_pca[:, 0], X_pca[:, 1], c=clusters, cmap='viridis', alpha=0.7)
+plt.title("K-Means Clustering After PCA")
+plt.xlabel("PCA Component 1")
+plt.ylabel("PCA Component 2")
+plt.show()
+************************************************************************************************************
+# VISUALISATION OUTPUT
+# K-Mean 2 clusters:
+https://github.com/ssokolova01/labdept/issues/1#issuecomment-2821186191
+# K-Mean 3 clusters:
+https://github.com/ssokolova01/labdept/issues/1#issuecomment-2821186668
+# K-Mean 4 clusters:
+https://github.com/ssokolova01/labdept/issues/1#issuecomment-2821187205
+# K-Mean 5 clusters:
+https://github.com/ssokolova01/labdept/issues/1#issuecomment-2821187771
+************************************************************************************************************
+#INTERPRETATION
+# PCA was used to reduce the feature space to fewer dimensions for clustering and visualisation. 
+# This method retains the most significant variance in the dataset, making patterns more visible.
+# K-Means clustering (with k=2, k=3, k=4, k=5) was then applied to this simplified space to identify potential subgroups in the dataset.
+# The resulting plots show clusters based on how data points are distributed in the PCA-transformed space.
+# Each color represents a distinct cluster of patients based on their features.
+# When the number of clusters (k) increase, some clusters split into smaller subgroups which could suggest hidden heterogeneity in the data.
+# The distribution shows possible subtypes or biological variability within the benign and malignant categories.
+# In this version again a nan cluster label appeared due to misalignment.
+# In this version k-means will attempt to force the data into many groups — even if some clusters aren't strongly supported by the structure. 
+# This may cause unstable clusters or very small ones. 
+# This may also lead to occasionally display of labels such as NaN if a cluster has no associated points or if there's a mismatch in data labeling.
+**************************************************************************************************************
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Question 4. Other classes within the dataset?
+
+# The answer on this question is positive, because the results strongly suggest the presence of subclasses beyond just benign and malignant. 
+# While the diagnosis variable is binary, the K-Means algorithm discovered 3, 4, or even 5 clusters, depending on the specified number of clusters. 
+# This indicates that there may be subtypes or stages of tumours within the benign or malignant groups.
+# These subclasses arise because K-Means looks at more than 30 features, many of which correspond to different biological aspects of the tumour like, for example, size and shape.
+# Therefore, samples with the same diagnosis might still differ significantly in these other characteristics, causing them to fall into separate clusters.
+# The presence of NaN clusters in the legend during visualisation was likely a plotting artifact, especially when PCA was applied after clustering and it is not a true cluster. 
+# However, the emergence and rearranging of clusters as the k value changes highlights that the dataset is not strictly binary in structure, and has more nuanced internal patterns.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
 

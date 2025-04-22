@@ -128,6 +128,8 @@ plt.xlabel("Importance Score")
 plt.tight_layout()
 plt.show()
 
+# Random Forest feature importances visualisation: https://github.com/ssokolova01/labdept/issues/1#issuecomment-2820790923
+
 # Logistic Regression Coefficients
 log_coefficients = pd.Series(log_model.coef_[0], index=selected_features_logreg).sort_values()
 
@@ -138,6 +140,7 @@ plt.xlabel("Coefficient Value")
 plt.tight_layout()
 plt.show()
 
+# Logistic Regression feature importances visualisation: 
 
 
 

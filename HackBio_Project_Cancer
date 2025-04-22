@@ -212,6 +212,7 @@ from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 
+# Downloading and preprocessing the dataset
 url = "https://raw.githubusercontent.com/PacktPublishing/Machine-Learning-in-Biotechnology-and-Life-Sciences/refs/heads/main/datasets/dataset_wisc_sd.csv"
 df = pd.read_csv(url)
 
@@ -282,17 +283,63 @@ https://github.com/ssokolova01/labdept/issues/1#issuecomment-2821048671
 # Each color represents a cluster assigned by the K-Means algorithm.
 # It helps identify potential hidden subtypes or biological variation within the benign and malignant diagnoses.
 # Different numbers of clusters (k=2, k=3, k=4, k=5) were assayed to explore the heterogeneity. 
+# The newly appearing cluster after increasing the k meaning can indicate the complex structure in the data such as multiple subgroups with subtle differences.
+# Also, it can be over-segmenting which happens when the algorithm slices clusters that don’t really differ much.
 # Some instability or appearance of NaN labels occurred, which should be due to misalignment as far as preprocessing dataset treatment was performed.
-
-
-
-There may be complex structure in the data — multiple subgroups with subtle differences.
-
-over-segmenting — the algorithm is now slicing clusters that don’t really differ much.
-
-Increasing K lets us explore finer groupings within the data. 
-If new, meaningful patterns emerge, it might suggest biological subtypes or feature-driven variations within diagnoses. 
-However, too many clusters can lead to overfitting or noisy splits, so we usually find an optimal K using methods like the elbow method or silhouette score.
-
+# The optimal number of clusters can be found by using subsequent analysis.
+************************************************************************************************************
 
 VERSION 2: PCA --> K-Mean option
+
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+
+# Downloading and preprocessing the dataset
+url = "https://raw.githubusercontent.com/PacktPublishing/Machine-Learning-in-Biotechnology-and-Life-Sciences/refs/heads/main/datasets/dataset_wisc_sd.csv"
+df = pd.read_csv(url)
+
+df = df.drop(columns=['id'])
+df['concave points_worst'] = pd.to_numeric(df['concave points_worst'], errors='coerce')
+df = df.dropna()
+X = df.drop(columns=['diagnosis'])
+scaler = StandardScaler()
+X_full_scaled = scaler.fit_transform(X)
+
+# PCA to 2 components
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_full_scaled)
+
+# K-Means clustering (for 2, 3, 4 and 5 number of clusters - separately)
+kmeans = KMeans(n_clusters=2, random_state=42)
+clusters = kmeans.fit_predict(X_pca)
+
+kmeans = KMeans(n_clusters=3, random_state=42)
+clusters = kmeans.fit_predict(X_pca)
+
+kmeans = KMeans(n_clusters=4, random_state=42)
+clusters = kmeans.fit_predict(X_pca)
+
+kmeans = KMeans(n_clusters=5, random_state=42)
+clusters = kmeans.fit_predict(X_pca)
+
+# Visualisation
+plt.figure(figsize=(8, 6))
+plt.scatter(X_pca[:, 0], X_pca[:, 1], c=clusters, cmap='viridis', alpha=0.7)
+plt.title("K-Means Clustering After PCA")
+plt.xlabel("PCA Component 1")
+plt.ylabel("PCA Component 2")
+plt.show()
+************************************************************************************************************
+# VISUALISATION OUTPUT
+# K-Mean 2 clusters:
+
+# K-Mean 3 clusters:
+
+# K-Mean 4 clusters:
+
+# K-Mean 5 clusters:
+
+************************************************************************************************************

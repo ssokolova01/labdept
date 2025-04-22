@@ -1,1 +1,37 @@
+# TASK:
+#Anatomy and Physiology [Cancer]
+# •	Look at this dataset
+# •	How do you distinguish benign from malignant datasets?
+# •	Using PCA and K-Mean clustering, classify and cluster the patients.
+# •	Do you think there are other subclasses within the dataset?
 
+Question 1. Dataset Overview
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+url = 'https://raw.githubusercontent.com/PacktPublishing/Machine-Learning-in-Biotechnology-and-Life-Sciences/refs/heads/main/datasets/dataset_wisc_sd.csv'
+df = pd.read_csv(url)
+
+# BASIC INFO
+print("Dataset Overview:")
+print(df.info())
+
+# FIRST FEW ROWS
+print("\n First 5 Rows:")
+print(df.head())
+
+# CHECK FOR MISSING VALUES
+print("\n Missing Values Per Column:")
+print(df.isnull().sum())
+
+# CHECK UNIQUE VALUES IN TARGET
+print ("\n Target variable distribution (Diagnosis):")
+print(df['diagnosis'].value_counts())
+
+#VISUALISATION
+plt.figure(figsize=(6, 4))
+sns.countplot(data=df, x='Diagnosis', palette='Set2')
+plt.title('Count of Diagnosis Classes (Benign vs Malignant)')
+plt.show()

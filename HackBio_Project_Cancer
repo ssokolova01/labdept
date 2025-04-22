@@ -198,11 +198,12 @@ plt.show()
 Question 3. PCA and K-Mean clustering.
 
 # Explanatory Note: in this question I tried to perform 2 possible sequences of the clustering analysis: K-Mean --> PCA and PCA --> K-Mean.
-# K-mean and PCA methods belong to the unsupervised classification.
+# K-mean and PCA methods belong to the unsupervised classification. 
+# K-Means clustering does not use dataset's diagnosis labels (two categories: benign and malignant), but groups data solely based on feature patterns. 
 # K-Mean --> PCA option: in this case clustering happens in original full feature space, and PCA is used just to visualise the results.
 # So, results show how do the original clusters look when projected to lower dimensions. 
 # PCA --> K-Mean option: in this case clustering happens in lower-dimensional space.
-# So, result show the natural groups exist in the reduced feature space.
+# So, result show the natural groups that exist in the reduced feature space.
 
 VERSION 1: K-Mean --> PCA option
 
@@ -279,7 +280,7 @@ https://github.com/ssokolova01/labdept/issues/1#issuecomment-2821048671
 # INTERPRETATION
 # K-Means clustering was applied on the full high-dimensional dataset to group the patients based on their biological features.
 # After clustering, used PCA was used to reduce the data to two dimensions for visualisation purposes.
-# The resulting plot shows how the patients in different clusters are positioned in lower-dimensional space. 
+# The resulting plots show how the patients in different clusters are positioned in lower-dimensional space. 
 # Each color represents a cluster assigned by the K-Means algorithm.
 # It helps identify potential hidden subtypes or biological variation within the benign and malignant diagnoses.
 # Different numbers of clusters (k=2, k=3, k=4, k=5) were assayed to explore the heterogeneity. 
@@ -344,3 +345,35 @@ https://github.com/ssokolova01/labdept/issues/1#issuecomment-2821187205
 https://github.com/ssokolova01/labdept/issues/1#issuecomment-2821187771
 ************************************************************************************************************
 #INTERPRETATION
+# PCA was used to reduce the feature space to fewer dimensions for clustering and visualisation. 
+# This method retains the most significant variance in the dataset, making patterns more visible.
+# K-Means clustering (with k=2, k=3, k=4, k=5) was then applied to this simplified space to identify potential subgroups in the dataset.
+# The resulting plots show clusters based on how data points are distributed in the PCA-transformed space.
+# Each color represents a distinct cluster of patients based on their features.
+# When the number of clusters (k) increase, some clusters split into smaller subgroups which could suggest hidden heterogeneity in the data.
+# The distribution shows possible subtypes or biological variability within the benign and malignant categories.
+# In this version again a nan cluster label appeared due to misalignment.
+# In this version k-means will attempt to force the data into many groups — even if some clusters aren't strongly supported by the structure. 
+# This may cause unstable clusters or very small ones. 
+# This may also lead to occasionally display of labels such as NaN if a cluster has no associated points or if there's a mismatch in data labeling.
+**************************************************************************************************************
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Question 4. Other classes within the dataset?
+
+# The answer on this question is positive, because the results strongly suggest the presence of subclasses beyond just benign and malignant. 
+# While the diagnosis variable is binary, the K-Means algorithm discovered 3, 4, or even 5 clusters, depending on the specified number of clusters. 
+# This indicates that there may be subtypes or stages of tumours within the benign or malignant groups.
+# These subclasses arise because K-Means looks at more than 30 features, many of which correspond to different biological aspects of the tumour like, for example, size and shape.
+# Therefore, samples with the same diagnosis might still differ significantly in these other characteristics, causing them to fall into separate clusters.
+# The presence of NaN clusters in the legend during visualisation was likely a plotting artifact, especially when PCA was applied after clustering and it is not a true cluster. 
+# However, the emergence and rearranging of clusters as the k value changes highlights that the dataset is not strictly binary in structure, and has more nuanced internal patterns.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+

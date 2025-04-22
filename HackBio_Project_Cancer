@@ -45,17 +45,98 @@ plt.show()
 
 # Question 2. Distinguish benign and malignant dataset.
 
-# Benign and malignant characteristics correspond to the "diagnosis" column data. 
-# Supervised classification is used including two methods applied to train the model: logistic regression and Random Forest.
-# The diagnosis is the target by which malignant and benign datasets are distinguished.
-# Other columns' data, except "id" and "diagnosis", are the features. There are 30 features.
-# The comparison of the effectiveness of both methods is done.
+# The "diagnosis" column contains the labels indicating whether a tumor is benign or malignant.
+# Supervised classification was performed using two models: Logistic Regression and Random Forest.
+# The "diagnosis" column serves as the target variable used to distinguish between malignant and benign cases.
+# All other columns, except "id" and "diagnosis", are numeric features — 30 in total — describing tumor characteristics.
+# A comparison of model performance was conducted to evaluate the effectiveness of both classification methods.
 
+# Data preprocessing is the first step to delete NA and drop irrelevant feature (id).
+df = df.drop(columns=['id'])
+df['concave points_worst'] = pd.to_numeric(df['concave points_worst'], errors='coerce')
+df = df.dropna()
+df['diagnosis'] = df['diagnosis'].map({'B': 0, 'M': 1})
 
+# Split features and target
+X = df.drop(columns=['diagnosis'])
+y = df['diagnosis']
 
+# Split dataset
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
+# Scale features
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
 
+# Feature Selection - Random Forest
+from sklearn.feature_selection import RFE
+from sklearn.ensemble import RandomForestClassifier
 
+rf_model = RandomForestClassifier(random_state=42)
+rf_selector = RFE(rf_model, n_features_to_select=10)
+rf_selector.fit(X_train_scaled, y_train)
+selected_features_rf = X.columns[rf_selector.support_]
+print("Top 10 Features Selected by Random Forest:\n", selected_features_rf)
+
+# Feature Selection - Logistic Regression
+from sklearn.linear_model import LogisticRegression
+
+log_model = LogisticRegression(solver='liblinear', max_iter=1000)
+log_selector = RFE(log_model, n_features_to_select=10)
+log_selector.fit(X_train_scaled, y_train)
+selected_features_logreg = X.columns[log_selector.support_]
+print("Top 10 Features Selected by Logistic Regression:\n", selected_features_logreg)
+
+# Prepare Data for Each Model
+# Random Forest
+X_train_rf = X_train[selected_features_rf]
+X_test_rf = X_test[selected_features_rf]
+X_train_rf_scaled = scaler.fit_transform(X_train_rf)
+X_test_rf_scaled = scaler.transform(X_test_rf)
+
+# Logistic Regression
+X_train_logreg = X_train[selected_features_logreg]
+X_test_logreg = X_test[selected_features_logreg]
+X_train_logreg_scaled = scaler.fit_transform(X_train_logreg)
+X_test_logreg_scaled = scaler.transform(X_test_logreg)
+
+# Train and Evaluate Models
+from sklearn.metrics import classification_report
+
+# Random Forest
+rf_model.fit(X_train_rf_scaled, y_train)
+rf_pred = rf_model.predict(X_test_rf_scaled)
+print("\n Random Forest Performance:\n", classification_report(y_test, rf_pred))
+
+# Logistic Regression
+log_model.fit(X_train_logreg_scaled, y_train)
+log_pred = log_model.predict(X_test_logreg_scaled)
+print("\n Logistic Regression Performance:\n", classification_report(y_test, log_pred))
+
+# Visualize Feature Importances
+
+# Random Forest Feature Importance
+rf_importances = pd.Series(rf_model.feature_importances_, index=selected_features_rf).sort_values(ascending=False)
+
+plt.figure(figsize=(8, 5))
+sns.barplot(x=rf_importances.values, y=rf_importances.index)
+plt.title("Random Forest - Feature Importances")
+plt.xlabel("Importance Score")
+plt.tight_layout()
+plt.show()
+
+# Logistic Regression Coefficients
+log_coefficients = pd.Series(log_model.coef_[0], index=selected_features_logreg).sort_values()
+
+plt.figure(figsize=(8, 5))
+log_coefficients.plot(kind='barh', color='teal')
+plt.title("Logistic Regression - Feature Coefficients")
+plt.xlabel("Coefficient Value")
+plt.tight_layout()
+plt.show()
 
 
 

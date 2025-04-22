@@ -46,7 +46,8 @@ plt.show()
 # Question 2. Distinguish benign and malignant dataset.
 
 # The "diagnosis" column contains the labels indicating whether a tumor is benign or malignant.
-# Supervised classification was performed using two models: Logistic Regression and Random Forest. They suit to categories while Linear Regression suit for continuous values.
+# Supervised classification was performed to distinguish Malignant and Benign cases using two models: 
+# Logistic Regression and Random Forest. They suit to categories (Malignant and Benign) while Linear Regression suit for continuous values.
 # The "diagnosis" column serves as the target variable used to distinguish between malignant and benign cases.
 # All other columns, except "id" and "diagnosis", are numeric features — 30 in total — describing tumor characteristics.
 # A comparison of model performance was conducted to evaluate the effectiveness of both classification methods.
@@ -197,6 +198,7 @@ plt.show()
 Question 3. PCA and K-Mean clustering.
 
 # Explanatory Note: in this question I tried to perform 2 possible sequences of the clustering analysis: K-Mean --> PCA and PCA --> K-Mean.
+# K-mean and PCA methods belong to the unsupervised classification.
 # K-Mean --> PCA option: in this case clustering happens in original full feature space, and PCA is used just to visualise the results.
 # So, results show how do the original clusters look when projected to lower dimensions. 
 # PCA --> K-Mean option: in this case clustering happens in lower-dimensional space.
@@ -204,10 +206,12 @@ Question 3. PCA and K-Mean clustering.
 
 VERSION 1: K-Mean --> PCA option
 
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
-*****************************************************************************************
-# REPEATED STEPS
+import matplotlib.pyplot as plt
+
 url = "https://raw.githubusercontent.com/PacktPublishing/Machine-Learning-in-Biotechnology-and-Life-Sciences/refs/heads/main/datasets/dataset_wisc_sd.csv"
 df = pd.read_csv(url)
 
@@ -217,24 +221,24 @@ df = df.dropna()
 
 diagnosis = df["diagnosis"]
 df = df.drop(columns=["diagnosis"])
-********************************************************************************************
+
 scaler = StandardScaler()
 scaled_data = scaler.fit_transform(df)
 
-# K-Mean clustering (for 2, 3, 4 and 5 number of clusters - do separately)
-kmeans = KMeans(n_clusters=2, random_state=42)  # try 3, 4, or 5
+# K-Mean clustering (for 2, 3, 4 and 5 number of clusters - separately)
+kmeans = KMeans(n_clusters=2, random_state=42)
 kmeans.fit(scaled_data)
 df["Cluster"] = kmeans.labels_
 
-kmeans = KMeans(n_clusters=3, random_state=42)  # try 3, 4, or 5
+kmeans = KMeans(n_clusters=3, random_state=42)
 kmeans.fit(scaled_data)
 df["Cluster"] = kmeans.labels_
 
-kmeans = KMeans(n_clusters=4, random_state=42)  # try 3, 4, or 5
+kmeans = KMeans(n_clusters=4, random_state=42)
 kmeans.fit(scaled_data)
 df["Cluster"] = kmeans.labels_
 
-kmeans = KMeans(n_clusters=5, random_state=42)  # try 3, 4, or 5
+kmeans = KMeans(n_clusters=5, random_state=42)
 kmeans.fit(scaled_data)
 df["Cluster"] = kmeans.labels_
 
@@ -261,7 +265,7 @@ plt.legend()
 plt.grid(True)
 plt.show()
 ************************************************************************************************************
-# Visualisation results
+# VISUALISATION OUTPUT
 # K-Mean 2 clusters:
 https://github.com/ssokolova01/labdept/issues/1#issuecomment-2821047027
 # K-Mean 3 clusters:
@@ -269,3 +273,26 @@ https://github.com/ssokolova01/labdept/issues/1#issuecomment-2821047543
 # K-Mean 4 clusters:
 https://github.com/ssokolova01/labdept/issues/1#issuecomment-2821048081
 # K-Mean 5 clusters:
+https://github.com/ssokolova01/labdept/issues/1#issuecomment-2821048671
+************************************************************************************************************
+# INTERPRETATION
+# K-Means clustering was applied on the full high-dimensional dataset to group the patients based on their biological features.
+# After clustering, used PCA was used to reduce the data to two dimensions for visualisation purposes.
+# The resulting plot shows how the patients in different clusters are positioned in lower-dimensional space. 
+# Each color represents a cluster assigned by the K-Means algorithm.
+# It helps identify potential hidden subtypes or biological variation within the benign and malignant diagnoses.
+# Different numbers of clusters (k=2, k=3, k=4, k=5) were assayed to explore the heterogeneity. 
+# Some instability or appearance of NaN labels occurred, which should be due to misalignment as far as preprocessing dataset treatment was performed.
+
+
+
+There may be complex structure in the data — multiple subgroups with subtle differences.
+
+over-segmenting — the algorithm is now slicing clusters that don’t really differ much.
+
+Increasing K lets us explore finer groupings within the data. 
+If new, meaningful patterns emerge, it might suggest biological subtypes or feature-driven variations within diagnoses. 
+However, too many clusters can lead to overfitting or noisy splits, so we usually find an optimal K using methods like the elbow method or silhouette score.
+
+
+VERSION 2: PCA --> K-Mean option

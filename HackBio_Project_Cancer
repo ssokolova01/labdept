@@ -46,7 +46,7 @@ plt.show()
 # Question 2. Distinguish benign and malignant dataset.
 
 # The "diagnosis" column contains the labels indicating whether a tumor is benign or malignant.
-# Supervised classification was performed using two models: Logistic Regression and Random Forest.
+# Supervised classification was performed using two models: Logistic Regression and Random Forest. They suit to categories while Linear Regression suit for continuous values.
 # The "diagnosis" column serves as the target variable used to distinguish between malignant and benign cases.
 # All other columns, except "id" and "diagnosis", are numeric features — 30 in total — describing tumor characteristics.
 # A comparison of model performance was conducted to evaluate the effectiveness of both classification methods.
